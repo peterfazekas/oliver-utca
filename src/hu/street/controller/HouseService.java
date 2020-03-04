@@ -2,8 +2,9 @@ package hu.street.controller;
 
 import hu.street.model.domain.House;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,16 +55,22 @@ public class HouseService {
      */
 
     public String getHouseColor(int houseNumber) {
-        return getHouseByNumber(houseNumber).getColor();
+        return getHouseByNumber(houseNumber)
+                .map(House::getColor)
+                .orElse(" ");
     }
 
     public String getPossibleColor(int houseNumber) {
-        return getPossibleColors(houseNumber).get(0);
+        Random random = new Random();
+        List<String> possibleColors = getPossibleColors(houseNumber);
+        return possibleColors.get(random.nextInt(possibleColors.size()));
     }
 
     private List<String> getPossibleColors(int houseNumber) {
         List<String> colors = getColors();
         colors.remove(getHouseColor(houseNumber));
+        colors.remove(getHouseColor(houseNumber - 2));
+        colors.remove(getHouseColor(houseNumber + 2));
         return colors;
     }
 
@@ -73,11 +80,10 @@ public class HouseService {
                 .collect(Collectors.toList());
     }
 
-    private House getHouseByNumber(int houseNumber) {
+    private Optional<House> getHouseByNumber(int houseNumber) {
         return houses.stream()
                 .filter(i -> i.getNumber() == houseNumber)
-                .findAny()
-                .get();
+                .findAny();
     }
 
     /**
